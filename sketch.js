@@ -17,7 +17,7 @@ const lineSpacing     = 60;   // 行间距
 const marginX         = 40;   // 左右边距
 const marginY         = 40;   // 上下边距
 const typeInterval    = 2;    // 打字机每隔多少帧出现一个新字符
-const maxOffset       = 45;   // 最大垂直偏移（px）
+const maxOffset       = 35;   // 最大垂直偏移（px）
 const floatSpeed      = 0.1;  // 浮动振荡速度（帧单位）
 const gyroSensitivity = 1;    // Δrotation 达到多少度时视为最大振幅
 
@@ -28,7 +28,7 @@ let prevRotY  = 0;  // 上一帧的 rotationY
 function setup() {
   createCanvas(windowWidth, windowHeight);
   textFont('sans-serif');
-  textSize(48);
+  textSize(36);
   textLeading(lineSpacing);
   noStroke();
   fill(30);
