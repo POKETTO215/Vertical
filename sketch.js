@@ -14,8 +14,8 @@ caught in the glare of your stare.`;
 
 let letters = [];
 const lineSpacing     = 60;   // 行间距
-const marginX         = 40;   // 左右边距
-const marginY         = 40;   // 上下边距
+const marginX         = 40;   // 左右最小边距
+const marginY         = 40;   // 上下最小边距
 const typeInterval    = 2;    // 打字机每隔多少帧出现一个新字符
 const maxOffset       = 35;   // 最大垂直偏移（px）
 const floatSpeed      = 0.1;  // 浮动振荡速度（帧单位）
@@ -26,39 +26,48 @@ let prevRotX  = 0;  // 上一帧的 rotationX
 let prevRotY  = 0;  // 上一帧的 rotationY
 
 function setup() {
+  // —— 画布全屏且自适应设备尺寸 —— 
   createCanvas(windowWidth, windowHeight);
+
   textFont('sans-serif');
   textSize(36);
   textLeading(lineSpacing);
   noStroke();
   fill(30);
 
-  initLetters();
-  initGyroPermission();
+  initLetters();          // 根据当前 canvas 尺寸 计算字符基准位置
+  initGyroPermission();   // 请求陀螺仪权限（iOS13+）
 }
 
 function initLetters() {
   letters = [];
   charIndex = 0;
 
+  // 1. 拆分文本为多行并测量内容块尺寸
   let lines = rawText.split('\n');
   let contentWidths  = lines.map(l => textWidth(l));
   let contentWidth   = max(...contentWidths);
   let contentHeight  = lines.length * lineSpacing;
 
-  // 计算居中并约束边距
-  let startX = constrain((width - contentWidth) / 2,
-                         marginX, width - marginX - contentWidth);
-  let startY = constrain((height - contentHeight) / 2,
-                         marginY, height - marginY - contentHeight);
+  // 2. 计算居中起点，并约束在边距范围内
+  let startX = (width  - contentWidth)  / 2;
+  let startY = (height - contentHeight) / 2;
+  startX = constrain(startX, marginX, width  - marginX  - contentWidth);
+  startY = constrain(startY, marginY, height - marginY  - contentHeight);
 
+  // 3. 为每个字符记录基准坐标和随机相位
   let x = startX, y = startY;
   for (let ch of rawText) {
     if (ch === '\n') {
       y += lineSpacing;
       x = startX;
     } else {
-      letters.push({ char: ch, baseX: x, baseY: y, phase: random(TWO_PI) });
+      letters.push({
+        char:  ch, 
+        baseX: x, 
+        baseY: y, 
+        phase: random(TWO_PI)
+      });
       x += textWidth(ch);
     }
   }
@@ -73,21 +82,19 @@ function draw() {
   }
   let floatEnabled = (charIndex >= letters.length);
 
-  // —— 计算陀螺仪变化量 —— 
-  // p5.js 全局 rotationX/Y
+  // —— 只在陀螺仪实际晃动时触发偏移 —— 
   let dX = rotationX - prevRotX;
   let dY = rotationY - prevRotY;
   prevRotX = rotationX;
   prevRotY = rotationY;
 
-  // 只有当陀螺仪有实际晃动 (abs(dX)+abs(dY) > 0) 时才计算偏移
   let delta = sqrt(dX * dX + dY * dY);
-  let norm = constrain(delta / gyroSensitivity, 0, 1);
+  let norm  = constrain(delta / gyroSensitivity, 0, 1);
   let amplitude = floatEnabled && norm > 0
     ? norm * maxOffset
-    : 0;  // 如果没晃动或文字未完全出现，则不偏移
+    : 0;
 
-  // —— 绘制字符，并在有输入时加弹性振荡 —— 
+  // —— 绘制出现的字符，并做“弹性浮动” —— 
   for (let i = 0; i < charIndex; i++) {
     let l = letters[i];
     let yOff = amplitude * sin(frameCount * floatSpeed + l.phase);
@@ -96,18 +103,19 @@ function draw() {
 }
 
 function windowResized() {
+  // 画布随屏幕大小变化而变化，并重新布局
   resizeCanvas(windowWidth, windowHeight);
   initLetters();
 }
 
 function initGyroPermission() {
-  // iOS 13+ 需要请求权限
+  // iOS 13+ 需要主动请求陀螺仪权限
   if (
     typeof DeviceOrientationEvent !== 'undefined' &&
     typeof DeviceOrientationEvent.requestPermission === 'function'
   ) {
     DeviceOrientationEvent.requestPermission()
-      .then(res => { /* granted => rotationX/Y start updating */ })
+      .then(res => { /* granted => rotationX/Y 开始更新 */ })
       .catch(console.warn);
   }
 }
