@@ -22,7 +22,7 @@ let prevRotX  = 0, prevRotY = 0;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  noStroke(); fill(30);
+  noStroke(); fill(20);
   textFont('sans-serif');
   initLetters();
   initGyroPermission();
