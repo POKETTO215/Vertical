@@ -36,7 +36,7 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
   // 设置字体
   textFont('sans-serif');
-  textSize(48);
+  textSize(28);
   textLeading(lineSpacing);
   noStroke();
   fill(30);
