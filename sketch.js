@@ -9,7 +9,7 @@ caught in the glare of your stare.`;
 
 let letters = [];
 // —— 参数 —— 
-const baseFontSize    = 36;   // 设计时默认字号（暂作最小字号用）
+const baseFontSize    = 20;   // 设计时默认字号（暂作最小字号用）
 const marginRatio     = 0.10; // 左右各留 10% 画布宽度
 const marginY         = 40;   // 上下边距固定 px
 const typeInterval    = 2;    
