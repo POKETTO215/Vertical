@@ -14,8 +14,8 @@ let letters = [];
 const lineSpacing     = 60;
 const marginX         = 40;
 const marginY         = 40;
-const typeInterval    = 3;
-const maxOffset       = 20;
+const typeInterval    = 2;
+const maxOffset       = 45;// 最大垂直偏移（px）
 const floatSpeed      = 0.1;
 
 let charIndex = 0;
