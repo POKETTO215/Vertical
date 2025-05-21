@@ -20,6 +20,8 @@ const gyroSensitivity = 1;
 let charIndex = 0;
 let prevRotX  = 0, prevRotY = 0;
 
+pixelDensity(1);
+
 function setup() {
   createCanvas(windowWidth, windowHeight);
   noStroke(); fill(20);
