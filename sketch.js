@@ -20,11 +20,14 @@ const gyroSensitivity = 1;
 let charIndex = 0;
 let prevRotX  = 0, prevRotY = 0;
 
-pixelDensity(1);
+// 用于保存陀螺仪数据（iOS/安卓/PC通用）
+let globalRotationX = 0, globalRotationY = 0;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  noStroke(); fill(20);
+  pixelDensity(1);
+  noStroke();
+  fill(20);
   textFont('sans-serif');
   initLetters();
   initGyroPermission();
@@ -88,11 +91,11 @@ function draw() {
   }
   let floatEnabled = charIndex >= letters.length;
 
-  // 计算陀螺仪增量
-  let dX = rotationX - prevRotX;
-  let dY = rotationY - prevRotY;
-  prevRotX = rotationX;
-  prevRotY = rotationY;
+  // 使用陀螺仪数据
+  let dX = globalRotationX - prevRotX;
+  let dY = globalRotationY - prevRotY;
+  prevRotX = globalRotationX;
+  prevRotY = globalRotationY;
   let delta = sqrt(dX*dX + dY*dY);
   let norm  = constrain(delta / gyroSensitivity, 0, 1);
   let amp   = floatEnabled && norm>0 ? norm * maxOffset : 0;
@@ -107,17 +110,45 @@ function draw() {
   }
 }
 
-function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
-  initLetters();
-}
-
+// 陀螺仪权限申请与数据监听
 function initGyroPermission() {
+  // iOS 13+ 必须用户交互触发权限请求
   if (
     typeof DeviceOrientationEvent !== 'undefined' &&
     typeof DeviceOrientationEvent.requestPermission === 'function'
   ) {
-    DeviceOrientationEvent.requestPermission()
-      .catch(console.warn);
+    let btn = createButton('启用陀螺仪体验动态效果');
+    btn.position(width / 2 - 90, height / 2);
+    btn.style('font-size', '18px');
+    btn.style('padding', '12px 28px');
+    btn.style('background', '#222');
+    btn.style('color', '#fff');
+    btn.style('border-radius', '8px');
+    btn.mousePressed(() => {
+      DeviceOrientationEvent.requestPermission()
+        .then(response => {
+          if (response === 'granted') {
+            window.addEventListener('deviceorientation', handleOrientation, true);
+            btn.remove();
+          } else {
+            alert('需要陀螺仪权限以体验完整效果');
+          }
+        })
+        .catch(console.warn);
+    });
+  } else {
+    // 安卓/PC直接监听
+    window.addEventListener('deviceorientation', handleOrientation, true);
   }
+}
+
+// 陀螺仪事件处理
+function handleOrientation(e) {
+  globalRotationX = e.beta  || 0; // X轴旋转
+  globalRotationY = e.gamma || 0; // Y轴旋转
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  initLetters();
 }
