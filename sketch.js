@@ -27,52 +27,51 @@ function initLetters() {
   letters = [];
   charIndex = 0;
 
+  // —— 步骤1：测量并拆分行 —— 
   textSize(baseFontSize);
   let lines = rawText.split('\n');
   let lineCount = lines.length;
 
+  // —— 步骤2：计算页边距与可用宽度 —— 
   let marginX      = width * marginRatio;
   let maxLineWidth = width - marginX * 2;
+  let minLetterGap = baseFontSize * 0.25;
+  let maxLetterGap = baseFontSize * 0.7;
 
+  // 行高直接用字号的 1.2 倍
   let lineSpacing = baseFontSize * 1.2;
 
+  // —— 步骤3：垂直居中起点 —— 
   let contentHeight = (lineCount - 1) * lineSpacing;
   let startY = (height - contentHeight) / 2;
   startY = constrain(startY, marginY, height - marginY - contentHeight);
 
+  // —— 步骤4：逐行动态字距并水平居中 —— 
   for (let row = 0; row < lineCount; row++) {
     let txt = lines[row];
-    // —— 步骤1：测量每个字符宽度，计算总宽度 —— 
-    let charWidths = [];
-    let totalWidth = 0;
-    for (let i = 0; i < txt.length; i++) {
-      let w = textWidth(txt[i]);
-      charWidths.push(w);
-      totalWidth += w;
-    }
+    // 动态字距：均分到 maxLineWidth 上
+    let gap = txt.length>1
+      ? constrain(maxLineWidth / (txt.length - 1), minLetterGap, maxLetterGap)
+      : 0;
+    let lineWidth = gap * (txt.length - 1);
 
-    // —— 步骤2：字间隙按实际可用宽度均分 —— 
-    let gaps = [];
-    let gapCount = Math.max(txt.length - 1, 1);
-    let remain = maxLineWidth - totalWidth;
-    let gap = constrain(remain / gapCount, baseFontSize * 0.20, baseFontSize * 0.7);
-    for (let i = 0; i < gapCount; i++) gaps.push(gap);
+    // 这行的起始 X（在左右 margin 里再居中）
+    let startX = marginX + (maxLineWidth - lineWidth) / 2;
 
-    // —— 步骤3：从起点精准排布每个字符 —— 
-    let startX = marginX + (maxLineWidth - (totalWidth + gap * gapCount)) / 2;
-    let x = startX;
+    // 为每个字符记录位置和相位
     for (let i = 0; i < txt.length; i++) {
+      let x = startX + i * gap;
+      let y = startY + row * lineSpacing;
       letters.push({
         char:  txt[i],
-        baseX: x + charWidths[i] / 2, // 以字符中心为基准
-        baseY: startY + row * lineSpacing,
+        baseX: x,
+        baseY: y,
         phase: random(TWO_PI)
       });
-      x += charWidths[i];
-      if (i < gaps.length) x += gaps[i];
     }
   }
 }
+
 
 
 function draw() {
