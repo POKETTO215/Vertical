@@ -23,6 +23,16 @@ let prevRotX  = 0, prevRotY = 0;
 // 用于保存陀螺仪数据（iOS/安卓/PC通用）
 let globalRotationX = 0, globalRotationY = 0;
 
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+  pixelDensity(1);
+  noStroke();
+  fill(20);
+  textFont('sans-serif');
+  initLetters();
+  initGyroPermission();
+}
+
 function initLetters() {
   letters = [];
   charIndex = 0;
@@ -71,8 +81,6 @@ function initLetters() {
     }
   }
 }
-
-
 
 function draw() {
   background(250);
