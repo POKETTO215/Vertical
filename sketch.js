@@ -5,7 +5,7 @@ with snowfall sifting down.
 and a mauve December sunset.
 not this gauche flash.
 this flesh akimbo.
-caught in the glare of your stare.`;
+caught in the glare of your stare..`;
 
 let letters = [];
 // —— 参数 —— 
